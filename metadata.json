@@ -1,0 +1,6 @@
+{
+  "name": "VisionReader AI",
+  "description": "Leitor semântico de imagem para IA generativa que analisa imagens de forma objetiva, detalhada e observacional.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
