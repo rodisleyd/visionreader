@@ -30,6 +30,7 @@
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "@types/express": "^4.17.21",
-    "@vercel/node": "^3.2.24"
+    "@vercel/node": "^3.2.24",
+    "vite-plugin-pwa": "^0.21.1"
   }
 }
