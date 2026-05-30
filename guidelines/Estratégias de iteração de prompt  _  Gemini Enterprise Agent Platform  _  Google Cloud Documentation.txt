@@ -1,0 +1,140 @@
+--- Page 1 ---
+Estratégias de iteração de prompt
+Em geral, o design de comandos exige algumas iterações até conseguir a resposta pretendida de maneira
+consistente. Sua estratégia de criação de comandos precisa aplicar as práticas recomendadas de design de
+comandos, com reﬁnamentos incrementais. É possível introduzir algumas ou todas as práticas recomendadas de
+maneira iterativa ao testar o desempenho que atende às necessidades do seu caso de uso.
+Além disso, às vezes, a ordem do conteúdo no prompt pode afetar a resposta. Tente mudar a ordem do conteúdo
+e conﬁra como a resposta muda. Por exemplo, para comandos multimodais, tente adicionar os arquivos ao
+comando antes das instruções.
+Ao receber respostas do modelo, anote os aspectos que você gosta ou não gosta nas respostas dele e modiﬁque
+os comandos para orientar o modelo para respostas que melhor se alinham aos seus casos de uso.
+Exemplos
+Neste exemplo, digamos que você queira que o modelo escreva o texto do anúncio para seu produto. Para
+começar, deﬁna o seguinte conteúdo do comando:
+Objetivo: criar o texto do anúncio
+Contexto:
+Categorias: escassez, exclusividade
+Descrição do produto: "O Chromecast é um dispositivo que permite aos usuários transmitir conteúdo
+sem ﬁo de outros dispositivos para que eles possam ver ﬁlmes, programas de TV, fotos, sites e muito
+mais na TV. O Chromecast pode exibir conteúdo de smartphones e tablets Android, iPhones e iPads,
+laptops Windows e Mac e o Chromebook Pixel."
+Restrições: cada resposta precisa ter duas frases ou menos.
+Testar como você fornece o conteúdo para o modelo pode ajudar a garantir que a resposta atenda melhor às suas
+necessidades. Suponha que você forneça ao modelo o conteúdo do comando exatamente como escrito:
+Primeira iteração
+Comando:
+Resposta:
+Create ad copy.
+Categories: scarcity, exclusivity
+Product description: "Chromecast is a device that allows users to wirelessly cast their
+content from other devices, so they can watch their favorite movies, TV shows, photos,
+websites, and more on their TV. Chromecast can display content from Android smartphones
+and tablets, iPhones & iPads, Windows and Mac laptops, and the Chromebook Pixel."
+Constraints: Each response should be two sentences or less.
+
+--- Page 2 ---
+(gemini-pro)
+Em seguida, tente reformatar o comando para conferir como a resposta muda quando o objetivo, as restrições e
+parte do contexto do comando são combinados em uma única frase:
+Segunda iteração
+Comando:
+Resposta:
+(gemini-pro)
+Desta vez, a resposta do modelo continha apenas uma opção de cópia para cada categoria. Se você perceber que
+precisa de pelo menos duas opções para cada categoria e que não quer limitar o tamanho da resposta, modiﬁque
+as restrições e tente executar a solicitação novamente:
+Terceira iteração
+Scarcity
+* Time is running out to experience the future of entertainment! Get your Chromecast
+before they're gone.
+* Limited quantities available! Don't miss your chance to own the streaming device
+everyone's talking about.
+Exclusivity
+* Unlock a world of entertainment with Chromecast. Experience the freedom of streaming
+like never before.
+* Upgrade your home entertainment with the exclusive Chromecast device. Join the elite
+group of cord-cutters who stream smarter.
+Create scarcity and exclusivity-focused ad copy that is less than two sentences.
+Product description: "Chromecast is a device that allows users to wirelessly cast their
+content from other devices, so they can watch their favorite movies, TV shows, photos,
+websites, and more on their TV. Chromecast can display content from Android smartphones
+and tablets, iPhones & iPads, Windows and Mac laptops, and the Chromebook Pixel."
+Options for Scarcity & Exclusivity-Driven Chromecast Ads:
+Option 1 (Scarcity): "Limited quantities available! Get your Chromecast today before
+they're gone and unlock a world of on-demand entertainment."
+Option 2 (Exclusivity): "Experience entertainment like never before. Chromecast: the
+ultimate upgrade for your TV, available for a limited time."
+
+--- Page 3 ---
+Comando:
+Resposta:
+(gemini-pro)
+Na terceira iteração, a resposta do modelo continha os campos de título e corpo do texto do anúncio. Para esse
+exemplo, digamos que essa resposta esteja alinhada aos seus requisitos de texto do anúncio.
+Create two ad-copies about scarcity and two ad-copies about exclusivity.
+Product description: "Chromecast is a device that allows users to wirelessly cast their
+content from other devices, so they can watch their favorite movies, TV shows, photos,
+websites, and more on their TV. Chromecast can display content from Android smartphones
+and tablets, iPhones & iPads, Windows and Mac laptops, and the Chromebook Pixel."
+Scarcity Ad Copies:
+Ad 1:
+Headline: Don't miss out! Chromecast is flying off the shelves!
+Body: Experience the magic of Chromecast before it's too late! Limited quantities are
+available, so grab yours now and start enjoying your favorite entertainment on the big
+screen.
+Ad 2:
+Headline: Last chance! Chromecast is almost sold out.
+Body: Time is running out to get your hands on Chromecast. Upgrade your TV experience
+today and enjoy seamless streaming from all your devices. Don't wait, supplies are
+limited!
+Exclusivity Ad Copies:
+Ad 1:
+Headline: Unlock a world of entertainment with the exclusive Chromecast.
+Body: Join the elite group of Chromecast users and experience the future of television.
+Enjoy effortless streaming, endless entertainment options, and unparalleled convenience.
+Chromecast: It's not just TV, it's an experience.
+Ad 2:
+Headline: Elevate your home entertainment with the Chromecast advantage.
+Body: Go beyond ordinary TV with Chromecast. Seamlessly stream content from all your
+devices and enjoy a personalized entertainment experience like no other. Discover the
+exclusivity of Chromecast today.
+
+--- Page 4 ---
+Agora que você ajustou a solicitação para receber uma resposta alinhada aos seus requisitos de texto do anúncio,
+atualize e teste o comando para garantir que o modelo produza respostas formatadas de maneira semelhante no
+futuro:
+Quarta iteração
+Comando:
+Resposta:
+(gemini-pro)
+Desta vez, a resposta do modelo é muito semelhante à iteração anterior, mesmo com as outras restrições, o que
+signiﬁca que você iterou com sucesso o comando.
+Create two ad-copies about scarcity and two ad-copies about exclusivity.
+Include a headline and body for each ad copy.
+Product description: "Chromecast is a device that allows users to wirelessly cast their
+content from other devices, so they can watch their favorite movies, TV shows, photos,
+websites, and more on their TV. Chromecast can display content from Android smartphones
+and tablets, iPhones & iPads, Windows and Mac laptops, and the Chromebook Pixel."
+Scarcity Ads:
+Ad 1:
+Headline: Last Chance! Chromecast is Selling Out Fast
+Body: Get the Chromecast experience before it's gone! Limited quantities remain. Upgrade
+your TV time today!
+Ad 2:
+Headline: Don't Miss Out! Chromecast Stock is Running Low
+Body: Time is running out to grab your Chromecast. Enjoy seamless streaming on the big
+screen. Order now while supplies last!
+Exclusivity Ads:
+Ad 1:
+Headline: Unlock the Ultimate Viewing Experience with Chromecast
+Body: Join the elite group of Chromecast users and enjoy unparalleled streaming
+convenience. Elevate your entertainment today!
+Ad 2:
+Headline: Experience the Future of Entertainment: Get Your Chromecast
+Body: Be among the first to enjoy the cutting-edge technology of Chromecast. Stream
+anything, anytime, effortlessly. Upgrade your home entertainment now!
+
+--- Page 5 ---
+Como demonstrado pelo exemplo, a iteração é parte integrante do processo de criação do comando e pode ser
+usada para orientar o modelo a ﬁm de produzir os melhores resultados para seu caso de uso.

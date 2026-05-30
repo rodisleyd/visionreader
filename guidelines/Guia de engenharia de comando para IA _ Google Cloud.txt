@@ -1,0 +1,473 @@
+--- Page 1 ---
+Engenharia de comandos:
+visão geral e guia
+Última atualização: 04/05/2026
+O surgimento dos modelos de linguagem
+grandes (LLMs, na sigla em inglês) trouxe
+possibilidades empolgantes de interação entre
+humanos e computadores. No entanto, aproveitar
+todo o potencial desses modelos avançados de
+IA exige uma habilidade crucial: a engenharia de
+comandos. Esse campo em ascensão tem como
+foco a criação de comandos eﬁcientes que
+desbloqueiam os recursos dos LLMs, permitindo
+que eles entendam a intenção, sigam as
+instruções e gerem os resultados desejados. À
+medida que interagimos com IA em diversas
+aplicações, a engenharia de comandos
+desempenha um papel vital para garantir
+interações precisas, relevantes e seguras.
+Dicas para se tornar um engenheiro de
+comandos de alto nível
+O que é engenharia de comando?
+A engenharia de comando é a arte e a ciência de criar e otimizar comandos para
+orientar modelos de IA, principalmente LLMs, para gerar as respostas desejadas. Ao
+elaborar os comandos com cuidado, você dá ao modelo contexto, instruções e
+exemplos que o ajudam a entender a intenção e responder de maneira signiﬁcativa.
+Pense nisso como um roteiro para a IA, direcionando-a para o resultado especíﬁco que
+você tem em mente.
+Para se aprofundar no mundo da criação de comandos e conhecer as aplicações dele,
+conﬁra a Introdução à criação de comandos no Google Cloud.
+Tudo pronto para testar LLMs e engenharia de comando? Faça o teste sem custo
+ﬁnanceiro da Plataforma de agentes do Gemini Enterprise e conheça o poder dessa
+tecnologia.
+1:53
+
+--- Page 2 ---
+O que é um comando para IA?
+No contexto da IA, um comando é a entrada que você fornece ao modelo para receber
+uma resposta especíﬁca. Isso pode assumir várias formas, desde perguntas simples
+ou palavras-chave a instruções complexas, snippets de código ou até mesmo
+exemplos de escrita criativa. A eﬁcácia do comando inﬂuencia diretamente a qualidade
+e a relevância do resultado da IA.
+Do que você precisa para a engenharia de comando?
+Vários elementos importantes contribuem para uma engenharia de comandos eﬁcaz.
+Assim, você consegue se comunicar de maneira eﬁcaz com os modelos de IA e
+alcançar o potencial máximo deles.
+Formato do comando
+A estrutura e o estilo do comando têm um papel signiﬁcativo na orientação da resposta
+da IA. Modelos diferentes podem responder melhor a formatos especíﬁcos, como:
+O formato do comando tem um papel signiﬁcativo na forma como a IA interpreta sua
+solicitação. Modelos diferentes podem responder melhor a formatos especíﬁcos,
+como perguntas em linguagem natural, comandos diretos ou entradas estruturadas
+com campos especíﬁcos. Entender os recursos e o formato preferido do modelo é
+essencial para criar comandos eﬁcientes.
+Contexto e exemplos
+Fornecer contexto e exemplos relevantes no comando ajuda a IA a entender a tarefa
+desejada e gerar resultados mais precisos e relevantes. Por exemplo, se você procura
+uma história criativa, incluir algumas frases descrevendo o tom ou tema desejado pode
+melhorar signiﬁcativamente os resultados.
+Como ajustar e adaptar
+O ajuste do modelo de IA em tarefas ou domínios especíﬁcos com comandos
+personalizados pode melhorar o desempenho. Além disso, adaptar comandos com
+
+--- Page 3 ---
+base no feedback do usuário ou nas saídas do modelo pode melhorar ainda mais as
+respostas do modelo ao longo do tempo.
+Conversas com vários turnos
+Ao elaborar comandos para conversas em vários turnos, os usuários podem se
+envolver em interações contínuas e contextuais com o modelo de IA, melhorando a
+experiência geral do usuário.
+Tipos de comandos
+Há vários tipos de comandos usados na IA, cada um com uma ﬁnalidade especíﬁca:
+Comandos diretos (zero-shot)
+Nos comandos zero-shot, é preciso dar ao modelo uma instrução ou pergunta direta,
+sem contexto ou exemplos adicionais. 
+Um exemplo disso é a geração de ideias, em que o modelo é solicitado a gerar ideias
+criativas ou soluções de brainstorming. Outro exemplo é o resumo, ou tradução, em
+que o modelo é solicitado a resumir ou traduzir um conteúdo.
+Comandos one-shot, few-shot e multishot
+Esse método envolve dar ao modelo um ou mais exemplos dos pares de entrada e
+saída desejados antes de apresentar o comando real. Isso ajuda o modelo a entender
+melhor a tarefa e gerar respostas mais precisas.
+Comandos de ﬂuxo de consciência
+Os comandos do CoT incentivam o modelo a dividir o raciocínio complexo em uma
+série de etapas intermediárias, levando a um resultado ﬁnal mais abrangente e bem
+estruturado.
+Comandos do CoT zero-shot
+
+--- Page 4 ---
+Combina os comandos de ﬂuxo de consciência com os comandos zero-shot pedindo
+que o modelo execute etapas de raciocínio, que muitas vezes produzem melhores
+resultados.
+Casos de uso e exemplos de engenharia de comando
+Aqui estão alguns exemplos especíﬁcos e casos de uso que mostram como a
+engenharia de comando ajuda a produzir resultados personalizados e relevantes.
+Idioma e geração de texto
+Cenário Instruções Comando de
+exemplo
+Escrita criativa Crie comandos que
+especiﬁquem gênero,
+tom, estilo e pontos do
+enredo para orientar a
+IA na geração de
+narrativas envolventes.
+"Escreva um conto
+sobre uma jovem que
+descobre um portal
+mágico no sótão dela."
+Resumo Forneça texto à IA e a
+instrua a gerar
+resumos concisos que
+capturem informações
+importantes.
+“Resuma os principais
+pontos das seguintes
+notícias sobre
+mudanças climáticas”.
+Tradução Especiﬁque os idiomas
+de origem e de destino
+para que a IA traduza
+textos com precisão,
+preservando o
+signiﬁcado e o
+contexto.
+"Traduza o seguinte
+texto do português
+para o espanhol: 'A
+rápida raposa marrom
+pula sobre o cachorro
+preguiçoso'."
+
+--- Page 5 ---
+Diálogo Crie comandos que
+simulem conversas,
+permitindo que a IA
+gere respostas que
+imitem a interação
+humana e mantenham
+o contexto.
+"Você é um chatbot
+amigável que ajuda os
+usuários a resolver
+problemas de
+computador. Responda
+à consulta do usuário:
+'Meu computador não
+liga.'"
+Respostas a perguntas
+Cenário Instruções Comando de
+exemplo
+Perguntas abertas Formule comandos
+que incentivam a IA a
+fornecer respostas
+abrangentes e
+informativas com base
+na base de
+conhecimento dela.
+"Explicar o conceito de
+computação quântica
+e seu possível impacto
+no futuro da
+tecnologia."
+Perguntas especíﬁcas Crie comandos que
+visam informações
+especíﬁcas, permitindo
+que a IA recupere
+respostas precisas do
+contexto fornecido ou
+da base de
+conhecimento interna
+dela.
+"Qual é a capital da
+França?" ou "De acordo
+com o texto fornecido,
+quais são as principais
+causas do
+desmatamento?"
+Perguntas de múltipla
+escolha
+Apresente comandos
+com opções, fazendo
+com que a IA analise e
+selecione a resposta
+mais apropriada com
+base na sua
+compreensão do
+contexto.
+"Quem escreveu a série
+Harry Potter? A) J.R.R.
+Tolkien, B) J.K.
+Rowling, C) Stephen
+King"
+
+--- Page 6 ---
+Perguntas hipotéticas Crie comandos que
+explorem situações
+hipotéticas, permitindo
+que a IA raciocine,
+especule e forneça
+possíveis resultados
+ou soluções.
+"O que aconteceria se
+os humanos pudessem
+viajar na velocidade da
+luz?"
+Perguntas baseadas
+em opinião
+Crie comandos que
+despertam a
+perspectiva ou opinião
+da IA sobre um tópico
+especíﬁco,
+incentivando-a a
+apresentar um
+raciocínio e uma
+justiﬁcativa para a
+posição.
+"Você acredita que a
+inteligência artiﬁcial no
+futuro vai superar a
+inteligência humana?
+Por que ou por que
+não?"
+Geração de código
+Cenário Instruções Comando de
+exemplo
+Preenchimento de
+código
+Forneça à IA um
+snippet de código
+parcial e solicite que
+ela sugira ou conclua o
+código restante com
+base no contexto e na
+linguagem de
+programação.
+"Escreva uma função
+em Python para
+calcular o fatorial de
+um determinado
+número."
+
+--- Page 7 ---
+Tradução de código Especiﬁque as
+linguagens de
+programação de
+origem e destino para
+permitir que a IA
+traduza o código,
+preservando a
+funcionalidade e a
+sintaxe.
+"Traduza o seguinte
+código Python para
+JavaScript: def
+greet(name):
+print('Hello,', name)"
+Otimização do código Peça que a IA analise o
+código existente e
+sugira melhorias de
+eﬁciência, legibilidade
+ou desempenho.
+"Otimize o código
+Python a seguir para
+reduzir o tempo de
+execução."
+Depuração de código Forneça à IA um
+código que contém
+erros e solicite que ela
+identiﬁque e sugira
+possíveis soluções
+para os problemas
+identiﬁcados.
+"Depure o código Java
+a seguir e explique por
+que ele está gerando
+uma
+NullPointerException."
+Geração de imagens
+Cenário Instruções Comando de
+exemplo
+Imagens fotorrealistas Crie comandos que
+descrevam a imagem
+desejada em detalhes,
+incluindo objetos,
+cenário, iluminação e
+estilo, para gerar
+imagens realistas e de
+alta qualidade.
+"Uma imagem
+fotorrealista de um pôr
+do sol sobre o oceano
+com a silhueta de
+palmeiras em frente ao
+céu."
+
+--- Page 8 ---
+Imagens artísticas Crie comandos que
+especiﬁquem estilos,
+técnicas e o assunto
+para orientar a IA na
+criação de imagens
+que imitem
+movimentos artísticos
+especíﬁcos ou
+evoquem
+determinadas
+emoções.
+"Uma pintura
+impressionista de uma
+rua movimentada com
+pessoas caminhando
+sob guarda-sóis na
+chuva."
+Imagens abstratas Elabore comandos que
+incentivem a IA a gerar
+imagens abertas a
+interpretações, usando
+formas, cores e
+texturas para evocar
+sentimentos ou
+conceitos.
+"Uma imagem abstrata
+que representa o
+conceito de esperança,
+usando cores
+brilhantes e formas
+que ﬂuem."
+Edição de imagens Forneça uma imagem
+à IA e especiﬁque as
+modiﬁcações
+desejadas, permitindo
+que ela edite e
+aprimore a imagem de
+acordo com as
+instruções fornecidas.
+"Mude o plano de
+fundo da foto para um
+céu noturno estrelado
+e adicione uma lua
+cheia." ou "Remova a
+pessoa desta imagem
+e a substitua por um
+gato".
+Estratégias para escrever comandos melhores
+O desenvolvimento de comandos eﬁcientes requer uma abordagem estratégica.
+Considere estas estratégias para aprimorar suas habilidades de engenharia de
+comando:
+1. Deﬁna metas e objetivos claros
+
+--- Page 9 ---
+Tática Exemplo de comando
+Use verbos de ação para especiﬁcar a
+ação desejada
+"Escreva uma lista com marcadores
+que resuma as principais descobertas
+do trabalho de pesquisa anexado"
+Deﬁna o tamanho e o formato
+desejados para a saída
+"Escreva um artigo de 500 palavras
+discutindo o impacto da mudança
+climática nas comunidades costeiras."
+Especiﬁque o público-alvo "Escreva a descrição de uma nova linha
+de produtos orgânicos de skincare,
+direcionada a jovens adultos
+preocupados com sustentabilidade."
+2. Forneça contexto e informações contextuais:
+Tática Exemplo de comando
+Inclua fatos e dados relevantes "Considerando que as temperaturas
+globais aumentaram 1 grau Celsius
+desde a era pré-industrial, discuta as
+possíveis consequências para o
+aumento do nível do mar."
+Mencione fontes ou documentos
+especíﬁcos
+"Com base no relatório ﬁnanceiro
+anexo, analise a lucratividade da
+empresa nos últimos cinco anos."
+
+--- Page 10 ---
+Deﬁna os principais termos e conceitos "Explique o conceito de computação
+quântica em termos simples, adequado
+para um público não técnico."
+3. Use comandos de poucos disparos (few-shot):
+Tática Exemplo de comando
+Forneça alguns exemplos de pares de
+entrada e saída desejados
+Entrada: "Gato" Saída: "Um pequeno
+mamífero peludo com bigodes."
+Entrada: "Cachorro" Saída: "Um cão
+domesticado conhecido por sua
+ﬁdelidade." Comando: "Elefante"
+Demonstre o estilo ou tom desejado Exemplo 1 (engraçado): "O discurso do
+político foi tão monótono que poderia
+curar a insônia." Exemplo 2 (formal): "A
+autoridade fez um discurso informativo
+e interessante." Comando: "Escreva
+uma frase descrevendo a rotina de
+stand-up do comediante."
+Mostre o nível de detalhamento
+desejado
+Exemplo 1 (breve): "O ﬁlme era sobre
+um garoto que faz amizade com um
+alienígena". Exemplo 2 (detalhado): "O
+ﬁlme de ﬁcção cientíﬁca segue a
+história de Elliot, um menino solitário
+que descobre e cria um vínculo único
+com um extraterrestre preso na Terra".
+Instrução: "Resuma o enredo do
+romance que você acabou de ler".
+4. Escreva de maneira especíﬁca:
+Tática Exemplo de comando
+
+--- Page 11 ---
+Use uma linguagem precisa e evite
+ambiguidades
+Em vez de: "Escreva algo sobre
+mudança climática", use: "Escreva um
+artigo persuasivo argumentando a
+implementação de regulamentações
+mais rígidas de emissão de carbono".
+Quantiﬁque suas solicitações sempre
+que possível
+Em vez de: "Escreva um longo poema",
+use: "Escreva um soneto de 14 linhas
+que explore temas de amor e perda".
+Divida tarefas complexas em etapas
+menores
+Em vez de: "Crie um plano de
+marketing", use: "1. Identiﬁque o
+público-alvo. 2. Desenvolva as
+principais mensagens de marketing. 3.
+Escolha os canais de marketing
+apropriados."
+5. Repita e experimente:
+Tática Ação
+Tente usar frases e palavras-chave
+diferentes
+Reformule o comando usando
+sinônimos ou estruturas alternativas de
+sentença.
+Ajuste o nível de detalhamento e
+especiﬁcidade
+Adicione ou remova informações para
+ajustar a saída.
+Teste diferentes tamanhos de comando Teste comandos mais curtos e longos
+para encontrar o equilíbrio ideal.
+6. Aproveite os comandos de ﬂuxo de consciência:
+
+--- Page 12 ---
+Tática Exemplo de comando
+Incentive o raciocínio passo a passo "Resolva esse problema passo a passo:
+o João tem 5 maçãs, ele come 2.
+Quantas maçãs ele ainda tem? Etapa 1:
+João começa com cinco maçãs. Etapa
+2: ele come duas maçãs, então
+precisamos subtrair 2 de 5. Etapa 3: 5 -
+2 = 3. Resposta: João tem três maçãs
+restantes."
+Peça ao modelo que explique o
+processo de raciocínio
+"Explique seu processo de pensamento
+ao determinar o sentimento sobre essa
+crítica de ﬁlme: 'A atuação foi
+fantástica, mas o enredo foi previsível.'"
+Oriente o modelo por uma sequência
+lógica de pensamento
+"Para classiﬁcar este e-mail como spam
+ou não spam, considere o seguinte: 1. O
+remetente é conhecido? 2. A linha de
+assunto contém palavras-chave
+suspeitas? 3. O e-mail está oferecendo
+algo bom demais para ser verdade?"

@@ -31,6 +31,17 @@ const LOADING_MESSAGES = [
   "Polindo riqueza semântica para descrição final..."
 ];
 
+const PROMPT_LOADING_MESSAGES = [
+  "Iniciando engenharia de prompt...",
+  "Lendo imagem e insumos textuais...",
+  "Carregando diretrizes dos PDFs de referência...",
+  "Analisando iluminação, lente e composição...",
+  "Estruturando os 4 pilares: Objetivo, Contexto, Restrições e Exemplos...",
+  "Evitando termos vagos e aplicando restrições rígidas...",
+  "Construindo a Cadeia de Raciocínio (Chain-of-Thought)...",
+  "Gerando prompt bilíngue final e polindo detalhes..."
+];
+
 export default function App() {
   const [isDark, setIsDark] = useState<boolean>(() => {
     try {
@@ -41,6 +52,9 @@ export default function App() {
     }
   });
 
+  const [activeTab, setActiveTab] = useState<"reader" | "generator">("reader");
+
+  // Estados da aba original (Leitor Semântico)
   const [image, setImage] = useState<string | null>(null);
   const [mimeType, setMimeType] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -56,6 +70,25 @@ export default function App() {
   const [copied, setCopied] = useState<boolean>(false);
   const [copiedEn, setCopiedEn] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  // Estados para a aba Gerador de Prompts
+  const [promptImage, setPromptImage] = useState<string | null>(null);
+  const [promptMimeType, setPromptMimeType] = useState<string | null>(null);
+  const [promptFileName, setPromptFileName] = useState<string | null>(null);
+  const [promptFileSize, setPromptFileSize] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [userRequest, setUserRequest] = useState<string>("");
+  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState<boolean>(false);
+  const [generatedPrompt, setGeneratedPrompt] = useState<string | null>(null);
+  const [generatedPromptEn, setGeneratedPromptEn] = useState<string | null>(null);
+  const [promptReasoning, setPromptReasoning] = useState<string | null>(null);
+  const [activePromptLanguage, setActivePromptLanguage] = useState<"pt" | "en">("pt");
+  const [promptError, setPromptError] = useState<string | null>(null);
+  const [copiedPrompt, setCopiedPrompt] = useState<boolean>(false);
+  const [copiedPromptEn, setCopiedPromptEn] = useState<boolean>(false);
+  const [isPromptDragging, setIsPromptDragging] = useState<boolean>(false);
+  const [showReasoning, setShowReasoning] = useState<boolean>(true);
+  const [promptLoadingMsgIdx, setPromptLoadingMsgIdx] = useState<number>(0);
 
   // Toggle do tema claro/escuro
   const toggleTheme = () => {
@@ -97,8 +130,9 @@ export default function App() {
   }, [history]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const promptFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Rotacionar as mensagens de carregamento de forma agradável
+  // Rotacionar as mensagens de carregamento de forma agradável (Leitor Semântico)
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isLoading) {
@@ -110,6 +144,19 @@ export default function App() {
     }
     return () => clearInterval(interval);
   }, [isLoading]);
+
+  // Rotacionar as mensagens de carregamento de forma agradável (Gerador de Prompts)
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isGeneratingPrompt) {
+      interval = setInterval(() => {
+        setPromptLoadingMsgIdx((prev) => (prev + 1) % PROMPT_LOADING_MESSAGES.length);
+      }, 1600);
+    } else {
+      setPromptLoadingMsgIdx(0);
+    }
+    return () => clearInterval(interval);
+  }, [isGeneratingPrompt]);
 
   // Formatar bytes em formato amigável (MB)
   const formatBytes = (bytes: number) => {
@@ -351,6 +398,155 @@ export default function App() {
     }
   };
 
+  // Processamento do arquivo de imagem na aba Gerador de Prompts
+  const handlePromptFile = (file: File) => {
+    setPromptError(null);
+    setGeneratedPrompt(null);
+    setGeneratedPromptEn(null);
+    setPromptReasoning(null);
+
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      setPromptError("Formato de arquivo não suportado. Por favor, envie JPG, PNG ou WEBP.");
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      setPromptError("A imagem ultrapassa o limite de 10MB permitido.");
+      return;
+    }
+
+    setPromptFileName(file.name);
+    setPromptFileSize(formatBytes(file.size));
+    setPromptMimeType(file.type);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        setPromptImage(reader.result);
+      }
+    };
+    reader.onerror = () => {
+      setPromptError("Ocorreu um erro ao carregar o arquivo da imagem.");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handlePromptDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsPromptDragging(true);
+  };
+
+  const handlePromptDragLeave = () => {
+    setIsPromptDragging(false);
+  };
+
+  const handlePromptDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsPromptDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handlePromptFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const triggerPromptFileSelect = () => {
+    if (promptFileInputRef.current) {
+      promptFileInputRef.current.click();
+    }
+  };
+
+  const handlePromptFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      handlePromptFile(e.target.files[0]);
+    }
+  };
+
+  // Chama a API de geração de prompt
+  const generatePrompt = async () => {
+    if (!promptImage && !imageUrl && !userRequest) {
+      setPromptError("Por favor, envie uma imagem, insira uma URL de imagem ou digite uma instrução na caixa de texto.");
+      return;
+    }
+
+    setIsGeneratingPrompt(true);
+    setPromptError(null);
+    setGeneratedPrompt(null);
+    setGeneratedPromptEn(null);
+    setPromptReasoning(null);
+
+    try {
+      const response = await fetch("/api/generate-prompt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          image: promptImage,
+          mimeType: promptMimeType,
+          imageUrl: imageUrl.trim() || undefined,
+          userRequest: userRequest.trim() || undefined,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Ocorreu um erro inesperado na geração do prompt.");
+      }
+
+      const data = await response.json();
+      setGeneratedPrompt(data.prompt);
+      setGeneratedPromptEn(data.prompt_en);
+      setPromptReasoning(data.reasoning);
+      
+      // Se a resposta retornou uma imagem (caso tenha sido baixada de URL), atualiza o preview
+      if (data.image) {
+        setPromptImage(data.image);
+        setPromptMimeType(data.image.split(";")[0].split(":")[1] || "image/jpeg");
+        setPromptFileName("imagem_url.png");
+        setPromptFileSize("URL Carregada");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setPromptError(err.message || "Erro de conexão com o servidor.");
+    } finally {
+      setIsGeneratingPrompt(false);
+    }
+  };
+
+  const handleCopyPrompt = () => {
+    if (generatedPrompt) {
+      navigator.clipboard.writeText(generatedPrompt);
+      setCopiedPrompt(true);
+      setTimeout(() => setCopiedPrompt(false), 2000);
+    }
+  };
+
+  const handleCopyPromptEn = () => {
+    if (generatedPromptEn) {
+      navigator.clipboard.writeText(generatedPromptEn);
+      setCopiedPromptEn(true);
+      setTimeout(() => setCopiedPromptEn(false), 2000);
+    }
+  };
+
+  const handleClearPrompt = () => {
+    setPromptImage(null);
+    setPromptMimeType(null);
+    setPromptFileName(null);
+    setPromptFileSize(null);
+    setImageUrl("");
+    setUserRequest("");
+    setGeneratedPrompt(null);
+    setGeneratedPromptEn(null);
+    setPromptReasoning(null);
+    setActivePromptLanguage("pt");
+    setPromptError(null);
+    if (promptFileInputRef.current) {
+      promptFileInputRef.current.value = "";
+    }
+  };
+
   return (
     <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${isDark ? "bg-slate-950 text-slate-100" : "bg-slate-50 text-slate-800"}`}>
       
@@ -399,8 +595,42 @@ export default function App() {
       {/* Main Content */}
       <main className="flex-grow max-w-6xl w-full mx-auto px-6 py-8 flex flex-col gap-8">
         
-        {/* Core Workspace Layout: Bento-like grid system */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Tab System Selector */}
+        <div className="flex border-b transition-colors duration-205 border-slate-200 dark:border-slate-800/80 mb-2">
+          <button
+            onClick={() => setActiveTab("reader")}
+            className={`py-3.5 px-6 font-semibold text-sm transition-all relative flex items-center gap-2 border-b-2 -mb-[2px] ${
+              activeTab === "reader"
+                ? "border-emerald-500 text-emerald-500 dark:text-emerald-400 font-bold"
+                : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+            }`}
+          >
+            <Eye className="w-4 h-4" />
+            Leitor Semântico
+          </button>
+          <button
+            onClick={() => setActiveTab("generator")}
+            className={`py-3.5 px-6 font-semibold text-sm transition-all relative flex items-center gap-2 border-b-2 -mb-[2px] ${
+              activeTab === "generator"
+                ? "border-emerald-500 text-emerald-500 dark:text-emerald-400 font-bold"
+                : "border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            Gerador de Prompts
+          </button>
+        </div>
+
+        <AnimatePresence mode="wait">
+          {activeTab === "reader" ? (
+            <motion.div
+              key="reader-tab"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.25 }}
+              className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
+            >
           
           {/* Esquerda: Upload e Configurações de Imagem (5 colunas no desktop) */}
           <div className="lg:col-span-5 flex flex-col gap-6">
@@ -1010,7 +1240,464 @@ export default function App() {
 
           </div>
 
-        </div>
+        </motion.div>
+      ) : (
+        <motion.div
+          key="generator-tab"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -15 }}
+          transition={{ duration: 0.25 }}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
+        >
+          {/* Esquerda: Upload, URL e Instruções (5 colunas) */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            
+            {/* Bloco de Upload/URL */}
+            <div className={`border rounded-2xl p-6 shadow-sm flex flex-col gap-5 ${isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200/80"}`}>
+              <div className="flex items-center justify-between">
+                <span className={`text-sm font-semibold tracking-tight flex items-center gap-2 ${isDark ? "text-slate-200" : "text-slate-900"}`}>
+                  <ImageIcon className="w-4 h-4 text-slate-500" />
+                  Imagem de Referência
+                </span>
+                {promptImage && (
+                  <span className="text-xs text-slate-400 font-mono">
+                    {promptFileSize}
+                  </span>
+                )}
+              </div>
+
+              <input 
+                type="file" 
+                ref={promptFileInputRef} 
+                onChange={handlePromptFileChange} 
+                accept=".png,.jpg,.jpeg,.webp" 
+                className="hidden" 
+              />
+
+              {/* Preview da Imagem */}
+              <AnimatePresence mode="wait">
+                {!promptImage && !imageUrl ? (
+                  <motion.div
+                    key="prompt-upload-zone"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    onClick={triggerPromptFileSelect}
+                    onDragOver={handlePromptDragOver}
+                    onDragLeave={handlePromptDragLeave}
+                    onDrop={handlePromptDrop}
+                    className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer min-h-[220px] transition-all duration-300 ${
+                      isPromptDragging 
+                        ? (isDark ? "border-emerald-500 bg-emerald-950/20 scale-[0.99]" : "border-emerald-400 bg-emerald-50/50 scale-[0.99]") 
+                        : (isDark ? "border-slate-800 hover:border-slate-700 hover:bg-slate-850/30" : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/70")
+                    }`}
+                  >
+                    <div className={`p-4 rounded-full mb-3 hover:scale-[1.05] transition-all duration-200 ${isDark ? "bg-slate-800 border border-slate-705 text-emerald-400" : "bg-slate-50 border border-slate-100 text-slate-600"}`}>
+                      <Upload className="w-6 h-6" />
+                    </div>
+                    <span className={`text-sm font-medium mb-1 ${isDark ? "text-slate-200" : "text-slate-800"}`}>
+                      Arraste sua imagem aqui
+                    </span>
+                    <span className={`text-xs ${isDark ? "text-slate-400" : "text-slate-505"}`}>
+                      ou clique para selecionar do dispositivo
+                    </span>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="prompt-preview-zone"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    className="flex flex-col gap-4"
+                  >
+                    <div className={`relative rounded-xl overflow-hidden shadow-inner flex items-center justify-center min-h-[220px] max-h-[350px] ${isDark ? "bg-slate-950 border border-slate-850" : "bg-slate-900 border border-slate-200/60"}`}>
+                      <img 
+                        src={promptImage || imageUrl} 
+                        alt="Preview" 
+                        className="object-contain w-full max-h-[300px]"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      
+                      <div className="absolute top-3 right-3 flex gap-2">
+                        {!imageUrl && (
+                          <button
+                            onClick={triggerPromptFileSelect}
+                            title="Substituir Imagem"
+                            className={`backdrop-blur-sm p-2 rounded-lg shadow-sm transition-all hover:scale-105 active:scale-95 ${
+                              isDark 
+                                ? "bg-slate-900/90 text-slate-300 border border-slate-750 hover:bg-slate-800 hover:text-white" 
+                                : "bg-white/90 text-slate-700 hover:text-slate-900 border border-slate-200/50 hover:bg-white"
+                            }`}
+                          >
+                            <RefreshCw className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button
+                          onClick={handleClearPrompt}
+                          title="Limpar Imagem"
+                          className="bg-red-500 text-white hover:bg-red-650 p-2 rounded-lg shadow-sm transition-all hover:scale-105 active:scale-95"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Campo para URL da Imagem */}
+              <div className="flex flex-col gap-2">
+                <label className={`text-xs font-semibold ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                  Ou insira a URL da imagem:
+                </label>
+                <input
+                  type="text"
+                  placeholder="https://exemplo.com/imagem.jpg"
+                  value={imageUrl}
+                  onChange={(e) => {
+                    setImageUrl(e.target.value);
+                    if (e.target.value && promptImage) {
+                      setPromptImage(null);
+                    }
+                  }}
+                  className={`w-full text-xs px-3.5 py-2.5 rounded-xl border transition-all duration-200 ${
+                    isDark 
+                      ? "bg-slate-950/80 border-slate-800 text-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" 
+                      : "bg-slate-50 border-slate-200 text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* Caixa de Texto de Instruções */}
+            <div className={`border rounded-2xl p-6 shadow-sm flex flex-col gap-4 ${isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200/80"}`}>
+              <label className={`text-xs font-bold uppercase tracking-wider ${isDark ? "text-slate-200" : "text-slate-900"}`}>
+                Instruções para o Prompt
+              </label>
+              <p className={`text-[11px] leading-relaxed -mt-2 ${isDark ? "text-slate-450" : "text-slate-500"}`}>
+                Peça variações de estilo, iluminação, cores ou cenários. Se deixado em branco, a IA extrairá fielmente o estilo da imagem fornecida.
+              </p>
+              <textarea
+                value={userRequest}
+                onChange={(e) => setUserRequest(e.target.value)}
+                placeholder="Ex: Crie um prompt no estilo steampunk dessa imagem. Mude a iluminação para luz de fim de tarde e adicione tons de dourado."
+                rows={4}
+                className={`w-full text-xs p-3 rounded-xl border resize-none transition-all duration-200 ${
+                  isDark 
+                    ? "bg-slate-950/80 border-slate-800 text-slate-200 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" 
+                    : "bg-slate-50 border-slate-200 text-slate-800 focus:bg-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                }`}
+              />
+
+              <button
+                onClick={generatePrompt}
+                disabled={isGeneratingPrompt || (!promptImage && !imageUrl && !userRequest)}
+                className={`w-full py-3.5 rounded-xl font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                  isDark 
+                    ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-emerald-950/40" 
+                    : "bg-slate-900 hover:bg-slate-800 text-white shadow-slate-200"
+                }`}
+              >
+                {isGeneratingPrompt ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Engenhando Prompt...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-amber-300" />
+                    Gerar Prompt de Elite
+                  </>
+                )}
+              </button>
+
+              {promptError && (
+                <div className={`p-3 rounded-xl flex items-start gap-2 border ${
+                  isDark ? "bg-red-955/20 border-red-900/40 text-red-400" : "bg-red-50 border-red-100 text-red-650"
+                }`}>
+                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                  <span className="text-xs leading-relaxed">{promptError}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Bloco de Diretrizes Aplicadas */}
+            <div className={`border rounded-2xl p-5 flex flex-col gap-3.5 ${isDark ? "bg-slate-900/40 border-slate-800" : "bg-slate-50 border-slate-200/60"}`}>
+              <span className={`text-xs font-bold tracking-wider uppercase flex items-center gap-1.5 ${isDark ? "text-slate-200" : "text-slate-900"}`}>
+                <Shield className="w-3.5 h-3.5 text-emerald-500" /> Diretrizes de Prompt Ativas
+              </span>
+              <p className={`text-[11px] leading-relaxed ${isDark ? "text-slate-440" : "text-slate-500"}`}>
+                Seu prompt será construído com base nas regras contidas nos PDFs do projeto:
+              </p>
+              <div className="flex flex-col gap-2">
+                <div className={`p-2 rounded-xl text-[10px] font-semibold border ${isDark ? "bg-slate-950/40 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-700"}`}>
+                  1. Engenharia de comandos: visão geral e guia
+                </div>
+                <div className={`p-2 rounded-xl text-[10px] font-semibold border ${isDark ? "bg-slate-950/40 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-700"}`}>
+                  2. Estratégias de iteração de prompt
+                </div>
+                <div className={`p-2 rounded-xl text-[10px] font-semibold border ${isDark ? "bg-slate-950/40 border-slate-800 text-slate-300" : "bg-white border-slate-200 text-slate-700"}`}>
+                  3. Guia Mestre de Engenharia de Prompt: Transformando Intenção
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Direita: Saída, Justificativa e Ações (7 colunas) */}
+          <div className="lg:col-span-7 flex flex-col gap-6">
+            
+            {/* Bloco de Resultado do Gerador */}
+            <div className={`border rounded-2xl p-6 shadow-sm min-h-[465px] flex flex-col justify-between transition-all duration-200 ${isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200/80"}`}>
+              
+              <AnimatePresence mode="wait">
+                
+                {/* 1. Estado Inicial: Apresentação */}
+                {!isGeneratingPrompt && !generatedPrompt && !promptError && (
+                  <motion.div
+                    key="prompt-initial"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col justify-between h-full"
+                  >
+                    <div className="flex flex-col gap-5">
+                      <div className={`flex items-center gap-2 border-b pb-4 ${isDark ? "border-slate-800 text-slate-400" : "border-slate-100 text-slate-400"}`}>
+                        <Sparkles className="w-5 h-5 text-emerald-500 animate-pulse" />
+                        <span className={`font-display font-semibold text-base ${isDark ? "text-white" : "text-slate-900"}`}>Extração de Prompt de Elite</span>
+                      </div>
+
+                      <div className={`border rounded-xl p-5 ${isDark ? "bg-emerald-950/10 border-emerald-900/40" : "bg-emerald-50/30 border-emerald-100/50"}`}>
+                        <h4 className={`font-semibold text-sm mb-2.5 ${isDark ? "text-emerald-400" : "text-emerald-800"}`}>
+                          Como funciona o Gerador de Prompts?
+                        </h4>
+                        <p className={`text-xs leading-relaxed ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                          O gerador cria instruções de imagem precisas para IAs como Midjourney ou Flux. 
+                          Ele lê as características da imagem de referência (ou seu texto) e constrói o prompt final estruturando a **Task (Objetivo)**, **Context (Contexto)** e **Constraints (Restrições)**, exatamente como preconizado nos PDFs de engenharia de comandos.
+                        </p>
+                      </div>
+
+                      <div className="space-y-4">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block font-mono">Regras de Ouro dos PDFs Aplicadas:</span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px]">
+                          <div className={`p-3 rounded-xl border ${isDark ? "border-slate-800 bg-slate-950/45 text-slate-300" : "border-slate-100 bg-slate-50/50 text-slate-600"}`}>
+                            <span className="font-bold block text-slate-800 dark:text-slate-200 mb-1">Verbos de Ação Fortes:</span>
+                            O modelo inicia com instruções explícitas usando imperativos determinísticos.
+                          </div>
+                          <div className={`p-3 rounded-xl border ${isDark ? "border-slate-800 bg-slate-950/45 text-slate-300" : "border-slate-100 bg-slate-50/50 text-slate-600"}`}>
+                            <span className="font-bold block text-slate-800 dark:text-slate-200 mb-1">Evitar Ambiguidade:</span>
+                            Nada de termos como "lindo" ou "ultra HD". A IA foca em iluminação, lentes e elementos factuais.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={`border-t pt-5 mt-6 flex justify-end ${isDark ? "border-slate-800" : "border-slate-100"}`}>
+                      <p className="text-[10px] text-slate-400 font-mono italic">Adicione inputs ao lado para iniciar a engenharia de prompt</p>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* 2. Estado de Carregamento */}
+                {isGeneratingPrompt && (
+                  <motion.div
+                    key="prompt-loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col items-center justify-center py-16 h-full text-center"
+                  >
+                    <div className="relative mb-6">
+                      <span className="absolute inline-flex h-16 w-16 rounded-full bg-emerald-400 opacity-20 animate-ping"></span>
+                      <div className={`w-16 h-16 rounded-full border-4 animate-spin flex items-center justify-center ${isDark ? "border-slate-800 border-t-emerald-400" : "border-slate-100 border-t-emerald-500"}`}>
+                        <Sparkles className="w-5 h-5 text-emerald-450" />
+                      </div>
+                    </div>
+
+                    <h3 className={`text-base font-bold mb-1.5 ${isDark ? "text-white" : "text-slate-900"}`}>
+                      Aplicando Engenharia de Prompt de Elite
+                    </h3>
+                    
+                    <div className="h-6 flex items-center justify-center">
+                      <AnimatePresence mode="wait">
+                        <motion.span
+                          key={promptLoadingMsgIdx}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          transition={{ duration: 0.3 }}
+                          className={`text-xs font-mono ${isDark ? "text-slate-400" : "text-slate-505"}`}
+                        >
+                          {PROMPT_LOADING_MESSAGES[promptLoadingMsgIdx]}
+                        </motion.span>
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* 3. Resultado Disponível */}
+                {generatedPrompt && !isGeneratingPrompt && (
+                  <motion.div
+                    key="prompt-ready"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col justify-between h-full gap-4"
+                  >
+                    <div className="flex flex-col gap-4">
+                      
+                      {/* Cabeçalho do Resultado */}
+                      <div className={`flex items-center justify-between border-b pb-3 ${isDark ? "border-slate-800" : "border-slate-100"}`}>
+                        <span className={`text-xs font-bold uppercase tracking-widest flex items-center gap-1.5 ${isDark ? "text-white" : "text-slate-900"}`}>
+                          <Sparkles className="w-3.5 h-3.5 text-emerald-500" /> Prompt Extraído com Elite
+                        </span>
+                        <button
+                          onClick={generatePrompt}
+                          title="Regenerar Prompt"
+                          className={`border p-2 rounded-lg transition-all active:scale-95 ${
+                            isDark 
+                              ? "bg-slate-950/40 hover:bg-slate-800 text-slate-400 hover:text-white border-slate-800" 
+                              : "bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border-slate-200"
+                          }`}
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      {/* Seletor de Idioma para o Prompt */}
+                      <div className="flex gap-2 p-1 border rounded-xl w-fit bg-slate-50 border-slate-100 transition-colors dark:bg-slate-950/45 dark:border-slate-850">
+                        <button
+                          type="button"
+                          onClick={() => setActivePromptLanguage("pt")}
+                          className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                            activePromptLanguage === "pt"
+                              ? isDark ? "bg-slate-800 text-white shadow-sm" : "bg-white text-slate-900 shadow-sm"
+                              : isDark ? "text-slate-400 hover:text-slate-200" : "text-slate-500 hover:text-slate-800"
+                          }`}
+                        >
+                          Português (PT-BR)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setActivePromptLanguage("en")}
+                          className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                            activePromptLanguage === "en"
+                              ? isDark ? "bg-slate-800 text-white shadow-sm" : "bg-white text-slate-900 shadow-sm"
+                              : isDark ? "text-slate-400 hover:text-slate-200" : "text-slate-500 hover:text-slate-800"
+                          }`}
+                        >
+                          English (EN)
+                        </button>
+                      </div>
+
+                      {/* Caixa de Prompt Gerado */}
+                      <div className={`relative border rounded-xl p-5 leading-relaxed text-sm shadow-inner min-h-[120px] max-h-[220px] overflow-y-auto selection:bg-emerald-100 ${
+                        isDark ? "bg-slate-950/60 border-slate-850 text-slate-300" : "bg-slate-50/50 border-slate-100 text-slate-700"
+                      }`}>
+                        <p className={`whitespace-pre-line leading-relaxed font-sans text-sm ${isDark ? "text-slate-200" : "text-slate-900"}`}>
+                          {activePromptLanguage === "pt" ? generatedPrompt : generatedPromptEn}
+                        </p>
+                      </div>
+
+                      {/* Seção de Raciocínio (Accordion / Collapsible) */}
+                      {promptReasoning && (
+                        <div className="flex flex-col gap-2">
+                          <button
+                            onClick={() => setShowReasoning(!showReasoning)}
+                            className={`flex items-center justify-between text-xs font-bold uppercase tracking-wider p-2.5 rounded-xl border transition-all ${
+                              isDark 
+                                ? "bg-slate-950/40 hover:bg-slate-900 border-slate-850 text-slate-400" 
+                                : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600"
+                            }`}
+                          >
+                            <span>Cadeia de Raciocínio (Chain-of-Thought)</span>
+                            <span>{showReasoning ? "Recolher ▲" : "Expandir ▼"}</span>
+                          </button>
+                          
+                          <AnimatePresence>
+                            {showReasoning && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="overflow-hidden"
+                              >
+                                <div className={`p-4 rounded-xl border font-sans text-xs leading-relaxed max-h-[180px] overflow-y-auto ${
+                                  isDark ? "bg-slate-950/80 border-slate-850 text-slate-400" : "bg-slate-50 border-slate-200 text-slate-650"
+                                }`}>
+                                  <p className="whitespace-pre-line">{promptReasoning}</p>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )}
+
+                    </div>
+
+                    {/* Ações Inferiores */}
+                    <div className={`border-t pt-5 mt-6 flex flex-col sm:flex-row gap-3 ${isDark ? "border-slate-800" : "border-slate-100"}`}>
+                      <button
+                        onClick={activePromptLanguage === "pt" ? handleCopyPrompt : handleCopyPromptEn}
+                        className={`flex-grow md:flex-grow-0 sm:px-6 py-3 rounded-xl font-medium text-xs flex items-center justify-center gap-2 transition-all shadow-sm ${
+                          (activePromptLanguage === "pt" ? copiedPrompt : copiedPromptEn)
+                            ? "bg-emerald-500 text-white"
+                            : isDark ? "bg-slate-100 text-slate-950 hover:bg-white active:scale-98" : "bg-slate-900 text-white hover:bg-slate-800 active:scale-98"
+                        }`}
+                      >
+                        {(activePromptLanguage === "pt" ? copiedPrompt : copiedPromptEn) ? (
+                          <>
+                            <Check className="w-4 h-4" />
+                            Copiado com Sucesso!
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-4 h-4" />
+                            {activePromptLanguage === "pt" ? "Copiar Prompt" : "Copy English Prompt"}
+                          </>
+                        )}
+                      </button>
+                      
+                      <button
+                        onClick={generatePrompt}
+                        className={`border font-medium text-xs py-3 px-5 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-98 ${
+                          isDark
+                            ? "border-slate-800 hover:border-slate-750 text-slate-355 bg-slate-950 hover:bg-slate-850"
+                            : "border-slate-200 hover:border-slate-300 text-slate-700 bg-white hover:bg-slate-50"
+                        }`}
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                        Gerar Novamente
+                      </button>
+                      
+                      <button
+                        onClick={handleClearPrompt}
+                        className={`border font-medium text-xs py-3 px-4 rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-98 sm:ml-auto ${
+                          isDark
+                            ? "border-red-955 text-red-400 bg-transparent hover:bg-red-950/20"
+                            : "border-red-105 text-red-500 bg-white hover:bg-red-50/50"
+                        }`}
+                      >
+                        Limpar Tudo
+                      </button>
+                    </div>
+
+                  </motion.div>
+                )}
+
+              </AnimatePresence>
+
+            </div>
+
+          </div>
+
+        </motion.div>
+      )}
+    </AnimatePresence>
 
         {/* Seção Informativo Inferior Educacional: Diferencial do Produto */}
         <section className={`mt-8 border-t pt-10 transition-colors duration-200 ${isDark ? "border-slate-900" : "border-slate-200/80"}`} id="education-gallery">
